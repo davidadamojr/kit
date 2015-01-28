@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">KeepInTouch</string>
+    <string name="new_contact">New Contact</string>
+    <string name="frequency_dialog_title">Reminder Frequency</string>
+    <string name="frequency_dialog_ok">OK</string>
+    <string name="frequency_dialog_cancel">Cancel</string>
+</resources>
