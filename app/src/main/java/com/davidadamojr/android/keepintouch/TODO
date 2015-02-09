@@ -1,0 +1,5 @@
+Prevent multiple additions to reminder list
+- loop through and delete existing record before adding new record
+
+Deal with listview recycling problem where frequency appears multiple times
+- this might require using a full-fledged adapter rather than a "SimpleCursorAdapter"

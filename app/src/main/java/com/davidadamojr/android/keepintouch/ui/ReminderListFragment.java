@@ -97,7 +97,7 @@ public class ReminderListFragment extends ListFragment {
                 public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
                     MenuInflater inflater = actionMode.getMenuInflater();
                     inflater.inflate(R.menu.context_reminder_list, menu);
-                    return false;
+                    return true;
                 }
 
                 @Override
@@ -118,7 +118,7 @@ public class ReminderListFragment extends ListFragment {
                                 }
                             }
                             actionMode.finish();
-                            adapter.notifyDataSetChanged();;
+                            adapter.notifyDataSetChanged();
                             return true;
                         default:
                             return false;

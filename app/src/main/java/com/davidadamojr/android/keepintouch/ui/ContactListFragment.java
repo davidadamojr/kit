@@ -1,6 +1,10 @@
 package com.davidadamojr.android.keepintouch.ui;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -21,6 +25,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.davidadamojr.android.keepintouch.R;
+import com.davidadamojr.android.keepintouch.core.ReminderAlarmReceiver;
+import com.davidadamojr.android.keepintouch.core.ReminderService;
 import com.davidadamojr.android.keepintouch.data.Reminder;
 import com.davidadamojr.android.keepintouch.data.ReminderLab;
 
@@ -69,6 +75,10 @@ public class ContactListFragment extends Fragment implements
     };
 
     private static final String DIALOG_FREQUENCY = "frequency";
+
+    public static final String ID_EXTRA = "com.davidadamojr.android.keepintouch.alarm_id";
+    public static final String PHONE_NUMBER_EXTRA = "com.davidadamojr.android.keepintouch.phonenumber";
+    public static final String NAME_EXTRA = "com.davidadamojr.android.keepintouch.name";
 
     ListView mContactsList;
 
@@ -175,14 +185,36 @@ public class ContactListFragment extends Fragment implements
     public void onDialogOKPressed(String frequency){
         mPhoneNumber = getPhoneNumber();
 
-        Reminder reminder = new Reminder(mContactName, frequency, mPhoneNumber);
-        ReminderLab.get(getActivity()).addReminder(reminder);
-
-
         TextView frequencyTextView = (TextView) mActiveView.findViewById(R.id.reminder_list_item_frequency);
         frequencyTextView.setText(frequency);
         frequencyTextView.setVisibility(View.VISIBLE);
 
+        // calculate the time of the next alarm for this reminder
+        long reminderTime;
+        if (frequency.equals("Daily")){
+            // reminderTime = System.currentTimeMillis() + 864 * 100000;
+            reminderTime = System.currentTimeMillis() + 10000;
+        } else if (frequency.equals("Weekly")){
+            reminderTime = System.currentTimeMillis() + 6048 * 100000;
+        } else if (frequency.equals("Biweekly")) {
+            reminderTime = System.currentTimeMillis() + 12096 * 100000;
+        } else if (frequency.equals("Monthly")){
+            reminderTime = System.currentTimeMillis() + 2592 * 1000000;
+        } else {
+            reminderTime = System.currentTimeMillis();
+        }
+
+        Reminder reminder = new Reminder(mContactName, frequency, mPhoneNumber, reminderTime);
+        ReminderLab.get(getActivity()).addReminder(reminder);
+
+        // set the alarm
+        Intent alarmIntent = new Intent(getActivity().getApplicationContext(), ReminderAlarmReceiver.class);
+        alarmIntent.putExtra(ID_EXTRA, reminder.getId().toString());
+        alarmIntent.putExtra(PHONE_NUMBER_EXTRA, mPhoneNumber);
+        alarmIntent.putExtra(NAME_EXTRA, mContactName);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(), 0, alarmIntent, 0);
+        AlarmManager alarmManager = (AlarmManager) getActivity().getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 3000, pendingIntent);
     }
 
     public String getPhoneNumber(){

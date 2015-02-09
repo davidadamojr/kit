@@ -4,4 +4,5 @@
     <string name="frequency_dialog_title">Reminder Frequency</string>
     <string name="frequency_dialog_ok">OK</string>
     <string name="frequency_dialog_cancel">Cancel</string>
+    <string name="call_reminder">Reminder to call </string>
 </resources>

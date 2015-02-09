@@ -29,13 +29,13 @@ public class ReminderJSONSerializer {
     }
 
     public void saveReminders(ArrayList<Reminder> reminders) throws JSONException, IOException {
-        //Build an array in JSON
+        // Build an array in JSON
         JSONArray array = new JSONArray();
         for (Reminder reminder : reminders){
             array.put(reminder.toJSON());
         }
 
-        //Write the file to disk
+        // Write the file to disk
         Writer writer = null;
         try {
             OutputStream out = mContext.openFileOutput(mFilename, Context.MODE_PRIVATE);
