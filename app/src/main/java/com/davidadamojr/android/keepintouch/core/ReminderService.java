@@ -1,5 +1,6 @@
 package com.davidadamojr.android.keepintouch.core;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -29,6 +30,7 @@ public class ReminderService extends IntentService {
         String phoneNumber = intent.getStringExtra(ContactListFragment.PHONE_NUMBER_EXTRA);
         String contactName = intent.getStringExtra(ContactListFragment.NAME_EXTRA);
         String reminderId = intent.getStringExtra(ContactListFragment.ID_EXTRA);
+        long timeAdvance = intent.getLongExtra(ContactListFragment.TIME_EXTRA, 0);
         String phoneNumberUri = "tel:" + phoneNumber;
 
         PendingIntent pi = PendingIntent.getActivity(this, 0, new Intent(Intent.ACTION_DIAL), 0);
@@ -46,8 +48,15 @@ public class ReminderService extends IntentService {
         notificationManager.notify(0, notification);
 
         // schedule next alarm
-
-        // commit without rescheduling the alarm
+        long reminderTime = System.currentTimeMillis() + timeAdvance;
+        Intent alarmIntent = new Intent(getApplicationContext(), ReminderAlarmReceiver.class);
+        alarmIntent.putExtra(ContactListFragment.ID_EXTRA, reminderId);
+        alarmIntent.putExtra(ContactListFragment.PHONE_NUMBER_EXTRA, phoneNumber);
+        alarmIntent.putExtra(ContactListFragment.NAME_EXTRA, contactName);
+        alarmIntent.putExtra(ContactListFragment.TIME_EXTRA, reminderTime);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, 0);
+        AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 4000, pendingIntent); // replace with remainderTime later on
 
         stopService(intent);
     }

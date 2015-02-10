@@ -3,3 +3,6 @@ Prevent multiple additions to reminder list
 
 Deal with listview recycling problem where frequency appears multiple times
 - this might require using a full-fledged adapter rather than a "SimpleCursorAdapter"
+
+Reschedule alarms on boot
+- make sure alarms are scheduled properly rather than reset

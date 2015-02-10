@@ -20,6 +20,7 @@ public class ReminderAlarmReceiver extends BroadcastReceiver {
         i.putExtra(ContactListFragment.NAME_EXTRA, intent.getStringExtra(ContactListFragment.NAME_EXTRA));
         i.putExtra(ContactListFragment.PHONE_NUMBER_EXTRA, intent.getStringExtra(ContactListFragment.PHONE_NUMBER_EXTRA));
         i.putExtra(ContactListFragment.ID_EXTRA, intent.getStringExtra(ContactListFragment.ID_EXTRA));
+        i.putExtra(ContactListFragment.TIME_EXTRA, intent.getLongExtra(ContactListFragment.TIME_EXTRA, 0));
         context.startService(i);
     }
 }

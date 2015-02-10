@@ -79,6 +79,7 @@ public class ContactListFragment extends Fragment implements
     public static final String ID_EXTRA = "com.davidadamojr.android.keepintouch.alarm_id";
     public static final String PHONE_NUMBER_EXTRA = "com.davidadamojr.android.keepintouch.phonenumber";
     public static final String NAME_EXTRA = "com.davidadamojr.android.keepintouch.name";
+    public static final String TIME_EXTRA = "com.davidadamojr.android.keepintouch.time";
 
     ListView mContactsList;
 
@@ -191,16 +192,21 @@ public class ContactListFragment extends Fragment implements
 
         // calculate the time of the next alarm for this reminder
         long reminderTime;
+        long timeAdvance;
         if (frequency.equals("Daily")){
-            // reminderTime = System.currentTimeMillis() + 864 * 100000;
-            reminderTime = System.currentTimeMillis() + 10000;
+            timeAdvance = 864 * 100000;
+            reminderTime = System.currentTimeMillis() + timeAdvance;
         } else if (frequency.equals("Weekly")){
-            reminderTime = System.currentTimeMillis() + 6048 * 100000;
+            timeAdvance = 6048 * 100000;
+            reminderTime = System.currentTimeMillis() + timeAdvance;
         } else if (frequency.equals("Biweekly")) {
-            reminderTime = System.currentTimeMillis() + 12096 * 100000;
+            timeAdvance = 12096 * 100000;
+            reminderTime = System.currentTimeMillis() + timeAdvance;
         } else if (frequency.equals("Monthly")){
-            reminderTime = System.currentTimeMillis() + 2592 * 1000000;
+            timeAdvance = 2592 * 1000000;
+            reminderTime = System.currentTimeMillis() + timeAdvance;
         } else {
+            timeAdvance = 0;
             reminderTime = System.currentTimeMillis();
         }
 
@@ -212,6 +218,7 @@ public class ContactListFragment extends Fragment implements
         alarmIntent.putExtra(ID_EXTRA, reminder.getId().toString());
         alarmIntent.putExtra(PHONE_NUMBER_EXTRA, mPhoneNumber);
         alarmIntent.putExtra(NAME_EXTRA, mContactName);
+        alarmIntent.putExtra(TIME_EXTRA, timeAdvance);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(), 0, alarmIntent, 0);
         AlarmManager alarmManager = (AlarmManager) getActivity().getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 3000, pendingIntent);
