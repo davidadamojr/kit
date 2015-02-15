@@ -2,6 +2,9 @@ package com.davidadamojr.android.keepintouch.ui;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,6 +28,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import com.davidadamojr.android.keepintouch.R;
+import com.davidadamojr.android.keepintouch.core.ReminderAlarmReceiver;
 import com.davidadamojr.android.keepintouch.data.Reminder;
 import com.davidadamojr.android.keepintouch.data.ReminderLab;
 
@@ -108,15 +112,27 @@ public class ReminderListFragment extends ListFragment {
                 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
                 @Override
                 public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-                    switch (menuItem.getItemId()){
+                    switch (menuItem.getItemId()) {
                         case R.id.menu_item_delete_reminder:
                             ReminderAdapter adapter = (ReminderAdapter) getListAdapter();
                             ReminderLab reminderLab = ReminderLab.get(getActivity());
-                            for (int i = adapter.getCount() - 1; i >= 0; i--){
-                                if (getListView().isItemChecked(i)){
-                                    reminderLab.deleteReminder(adapter.getItem(i));
+                            for (int i = adapter.getCount() - 1; i >= 0; i--) {
+                                if (getListView().isItemChecked(i)) {
+                                    Reminder reminder = (Reminder) adapter.getItem(i);
+                                    reminderLab.deleteReminder(reminder);
+
+                                    // disable alarm for this reminder
+                                    AlarmManager alarmManager = (AlarmManager) getActivity().getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+                                    Intent alarmIntent = new Intent(getActivity().getApplicationContext(), ReminderAlarmReceiver.class);
+                                    alarmIntent.putExtra(ContactListFragment.ID_EXTRA, reminder.getId());
+                                    alarmIntent.putExtra(ContactListFragment.PHONE_NUMBER_EXTRA, reminder.getPhoneNumber());
+                                    alarmIntent.putExtra(ContactListFragment.NAME_EXTRA, reminder.getContactName());
+                                    alarmIntent.putExtra(ContactListFragment.TIME_EXTRA, reminder.getNextReminder());
+                                    PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(), reminder.getId(), alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                    alarmManager.cancel(pendingIntent);
                                 }
                             }
+
                             actionMode.finish();
                             adapter.notifyDataSetChanged();
                             return true;
@@ -204,6 +220,13 @@ public class ReminderListFragment extends ListFragment {
         }
 
         return super.onContextItemSelected(item);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        // onPause is a good place to save persistent data
+        ReminderLab.get(getActivity()).saveReminders();
     }
 }
 

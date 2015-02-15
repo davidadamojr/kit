@@ -16,6 +16,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -215,13 +216,16 @@ public class ContactListFragment extends Fragment implements
 
         // set the alarm
         Intent alarmIntent = new Intent(getActivity().getApplicationContext(), ReminderAlarmReceiver.class);
-        alarmIntent.putExtra(ID_EXTRA, reminder.getId().toString());
+        alarmIntent.putExtra(ID_EXTRA, reminder.getId());
         alarmIntent.putExtra(PHONE_NUMBER_EXTRA, mPhoneNumber);
         alarmIntent.putExtra(NAME_EXTRA, mContactName);
         alarmIntent.putExtra(TIME_EXTRA, timeAdvance);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(), 0, alarmIntent, 0);
+
+        // use the position of the reminder in the ArrayList as requestCode
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(), reminder.getId(), alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Log.i("ContactListFragment", "Alarm created with ID: " + reminder.getId());
         AlarmManager alarmManager = (AlarmManager) getActivity().getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 3000, pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeAdvance, pendingIntent);
     }
 
     public String getPhoneNumber(){

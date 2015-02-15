@@ -13,7 +13,7 @@ public class Reminder {
     private static final String JSON_PHONE_NUMBER = "phone_number"; // phone number of contact
     private static final String JSON_NEXT_REMINDER = "next_reminder"; // the next scheduled reminder
 
-    private UUID mId;
+    private int mId;
     private String mContactName;
     private String mFrequency;
     private String mPhoneNumber;
@@ -21,7 +21,7 @@ public class Reminder {
 
     public Reminder(String contactName, String frequency, String phoneNumber, long nextReminder){
         //Generate unique identifier
-        mId = UUID.randomUUID();
+        mId = (int) System.currentTimeMillis() / 1000 * -1;
         mContactName = contactName;
         mFrequency = frequency;
         mPhoneNumber = phoneNumber;
@@ -29,7 +29,7 @@ public class Reminder {
     }
 
     public Reminder(JSONObject json) throws JSONException {
-        mId = UUID.fromString(json.getString(JSON_ID));
+        mId = Integer.parseInt(json.getString(JSON_ID));
         mContactName = json.getString(JSON_CONTACT_NAME);
         mFrequency = json.getString(JSON_FREQUENCY);
         mPhoneNumber = json.getString(JSON_PHONE_NUMBER);
@@ -48,11 +48,11 @@ public class Reminder {
 
     public long getNextReminder() { return mNextReminder; }
 
-    public UUID getId() { return mId; }
+    public int getId() { return mId; }
 
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
-        json.put(JSON_ID, mId.toString());
+        json.put(JSON_ID, Long.toString(mId));
         json.put(JSON_CONTACT_NAME, mContactName);
         json.put(JSON_FREQUENCY, mFrequency);
         json.put(JSON_PHONE_NUMBER, mPhoneNumber);

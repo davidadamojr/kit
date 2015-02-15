@@ -49,9 +49,9 @@ public class ReminderLab {
         return sReminderLab;
     }
 
-    public Reminder getReminder(UUID id){
+    public Reminder getReminder(int id){
         for (Reminder reminder : mReminders){
-            if (reminder.getId().equals(id))
+            if (reminder.getId() == id)
                 return reminder;
         }
         return null;

@@ -25,11 +25,11 @@ public class ReminderService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent){
-        Log.i("ReminderService", "Service started!");
+        // Log.i("ReminderService", "Service started!");
         // create notification
         String phoneNumber = intent.getStringExtra(ContactListFragment.PHONE_NUMBER_EXTRA);
         String contactName = intent.getStringExtra(ContactListFragment.NAME_EXTRA);
-        String reminderId = intent.getStringExtra(ContactListFragment.ID_EXTRA);
+        int reminderId = intent.getIntExtra(ContactListFragment.ID_EXTRA, 0);
         long timeAdvance = intent.getLongExtra(ContactListFragment.TIME_EXTRA, 0);
         String phoneNumberUri = "tel:" + phoneNumber;
 
@@ -45,7 +45,7 @@ public class ReminderService extends IntentService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(0, notification);
+        notificationManager.notify(reminderId, notification);
 
         // schedule next alarm
         long reminderTime = System.currentTimeMillis() + timeAdvance;
@@ -54,9 +54,9 @@ public class ReminderService extends IntentService {
         alarmIntent.putExtra(ContactListFragment.PHONE_NUMBER_EXTRA, phoneNumber);
         alarmIntent.putExtra(ContactListFragment.NAME_EXTRA, contactName);
         alarmIntent.putExtra(ContactListFragment.TIME_EXTRA, reminderTime);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), reminderId, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 4000, pendingIntent); // replace with remainderTime later on
+        alarmManager.set(AlarmManager.RTC_WAKEUP, reminderTime, pendingIntent); // replace with remainderTime later on
 
         stopService(intent);
     }
