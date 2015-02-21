@@ -1,11 +1,14 @@
 package com.davidadamojr.android.keepintouch.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.UUID;
 
-public class Reminder {
+public class Reminder implements Parcelable {
 
     private static final String JSON_ID = "id"; //id of the pending intent
     private static final String JSON_CONTACT_NAME = "contact_name";
@@ -59,5 +62,35 @@ public class Reminder {
         json.put(JSON_NEXT_REMINDER, mNextReminder);
 
         return json;
+    }
+
+    public static final Parcelable.Creator<Reminder> CREATOR = new Parcelable.Creator<Reminder>(){
+        public Reminder createFromParcel(Parcel in){
+            int id = in.readInt();
+            String contactName = in.readString();
+            String frequency = in.readString();
+            String phoneNumber = in.readString();
+            long nextReminder = in.readLong();
+            Reminder reminder = new Reminder(contactName, frequency, phoneNumber, nextReminder);
+            return reminder;
+        }
+
+        public Reminder[] newArray(int size){
+            return new Reminder[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(mId);
+        parcel.writeString(mContactName);
+        parcel.writeString(mFrequency);
+        parcel.writeString(mPhoneNumber);
+        parcel.writeLong(mNextReminder);
     }
 }
