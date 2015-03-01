@@ -128,8 +128,14 @@ public class ReminderListFragment extends ListFragment {
                                     alarmIntent.putExtra(ContactListFragment.PHONE_NUMBER_EXTRA, reminder.getPhoneNumber());
                                     alarmIntent.putExtra(ContactListFragment.NAME_EXTRA, reminder.getContactName());
                                     alarmIntent.putExtra(ContactListFragment.TIME_EXTRA, reminder.getNextReminder());
-                                    PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(), reminder.getId(), alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                    alarmManager.cancel(pendingIntent);
+                                    boolean alarmUp = (PendingIntent.getBroadcast(getActivity().getApplicationContext(), reminder.getId(), alarmIntent, PendingIntent.FLAG_NO_CREATE) != null);
+                                    if (alarmUp) {
+                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(), reminder.getId(), alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                        alarmManager.cancel(pendingIntent);
+                                    } else {
+                                        Log.i(TAG, "Alarm does not exist!!!!");
+                                    }
+
                                 }
                             }
 

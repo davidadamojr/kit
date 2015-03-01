@@ -24,7 +24,7 @@ public class Reminder implements Parcelable {
 
     public Reminder(String contactName, String frequency, String phoneNumber, long nextReminder){
         //Generate unique identifier
-        mId = (int) System.currentTimeMillis() / 1000 * -1;
+        mId = (int) System.currentTimeMillis() / 1000 * -1; // timestamps are negative
         mContactName = contactName;
         mFrequency = frequency;
         mPhoneNumber = phoneNumber;
@@ -37,6 +37,10 @@ public class Reminder implements Parcelable {
         mFrequency = json.getString(JSON_FREQUENCY);
         mPhoneNumber = json.getString(JSON_PHONE_NUMBER);
         mNextReminder = json.getLong(JSON_NEXT_REMINDER);
+    }
+
+    public void setNextReminder(long nextReminder){
+        mNextReminder = nextReminder;
     }
 
     public String getContactName() { return mContactName; }
@@ -55,7 +59,7 @@ public class Reminder implements Parcelable {
 
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
-        json.put(JSON_ID, Long.toString(mId));
+        json.put(JSON_ID, Integer.toString(mId));
         json.put(JSON_CONTACT_NAME, mContactName);
         json.put(JSON_FREQUENCY, mFrequency);
         json.put(JSON_PHONE_NUMBER, mPhoneNumber);

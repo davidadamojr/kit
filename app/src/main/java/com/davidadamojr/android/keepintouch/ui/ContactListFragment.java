@@ -31,6 +31,8 @@ import com.davidadamojr.android.keepintouch.core.ReminderService;
 import com.davidadamojr.android.keepintouch.data.Reminder;
 import com.davidadamojr.android.keepintouch.data.ReminderLab;
 
+import java.util.ArrayList;
+
 public class ContactListFragment extends Fragment implements
     LoaderManager.LoaderCallbacks<Cursor>,
     AdapterView.OnItemClickListener {
@@ -195,10 +197,12 @@ public class ContactListFragment extends Fragment implements
         long reminderTime;
         long timeAdvance;
         if (frequency.equals("Daily")){
-            timeAdvance = 864 * 100000;
+            // timeAdvance = 864 * 100000;
+            timeAdvance = 15000;
             reminderTime = System.currentTimeMillis() + timeAdvance;
         } else if (frequency.equals("Weekly")){
-            timeAdvance = 6048 * 100000;
+            // timeAdvance = 6048 * 100000;
+            timeAdvance = 25000;
             reminderTime = System.currentTimeMillis() + timeAdvance;
         } else if (frequency.equals("Biweekly")) {
             timeAdvance = 12096 * 100000;
@@ -211,21 +215,44 @@ public class ContactListFragment extends Fragment implements
             reminderTime = System.currentTimeMillis();
         }
 
-        Reminder reminder = new Reminder(mContactName, frequency, mPhoneNumber, reminderTime);
-        ReminderLab.get(getActivity()).addReminder(reminder);
+        boolean alreadyExists = false;
+        ArrayList<Reminder> reminders = ReminderLab.get(getActivity()).getReminders();
+        for (Reminder aReminder : reminders){
+            if (aReminder.getPhoneNumber() == mPhoneNumber){
+                alreadyExists = true;
+                aReminder.setFrequency(frequency);
 
-        // set the alarm
-        Intent alarmIntent = new Intent(getActivity().getApplicationContext(), ReminderAlarmReceiver.class);
-        alarmIntent.putExtra(ID_EXTRA, reminder.getId());
-        alarmIntent.putExtra(PHONE_NUMBER_EXTRA, mPhoneNumber);
-        alarmIntent.putExtra(NAME_EXTRA, mContactName);
-        alarmIntent.putExtra(TIME_EXTRA, timeAdvance);
+                Intent alarmIntent = new Intent(getActivity().getApplicationContext(), ReminderAlarmReceiver.class);
+                alarmIntent.putExtra(ID_EXTRA, aReminder.getId());
+                alarmIntent.putExtra(PHONE_NUMBER_EXTRA, mPhoneNumber);
+                alarmIntent.putExtra(NAME_EXTRA, mContactName);
+                alarmIntent.putExtra(TIME_EXTRA, timeAdvance);
 
-        // use the position of the reminder in the ArrayList as requestCode
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(), reminder.getId(), alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        Log.i("ContactListFragment", "Alarm created with ID: " + reminder.getId());
-        AlarmManager alarmManager = (AlarmManager) getActivity().getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeAdvance, pendingIntent);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(), aReminder.getId(), alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                AlarmManager alarmManager = (AlarmManager) getActivity().getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+                alarmManager.cancel(pendingIntent);
+                alarmManager.set(AlarmManager.RTC_WAKEUP, reminderTime, pendingIntent);
+                break;
+            }
+        }
+
+        if (!alreadyExists) {
+            Reminder reminder = new Reminder(mContactName, frequency, mPhoneNumber, reminderTime);
+            ReminderLab.get(getActivity()).addReminder(reminder);
+
+            // set the alarm
+            Intent alarmIntent = new Intent(getActivity().getApplicationContext(), ReminderAlarmReceiver.class);
+            alarmIntent.putExtra(ID_EXTRA, reminder.getId());
+            alarmIntent.putExtra(PHONE_NUMBER_EXTRA, mPhoneNumber);
+            alarmIntent.putExtra(NAME_EXTRA, mContactName);
+            alarmIntent.putExtra(TIME_EXTRA, timeAdvance);
+
+            // use the position of the reminder in the ArrayList as requestCode
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(), reminder.getId(), alarmIntent, 0);
+            Log.i("ContactListFragment", "Created PendingIntent for first time with ID: " + reminder.getId());
+            AlarmManager alarmManager = (AlarmManager) getActivity().getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+            alarmManager.set(AlarmManager.RTC_WAKEUP, reminderTime, pendingIntent);
+        }
     }
 
     public String getPhoneNumber(){

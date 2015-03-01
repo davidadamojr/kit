@@ -7,17 +7,20 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.davidadamojr.android.keepintouch.R;
 import com.davidadamojr.android.keepintouch.data.Reminder;
+import com.davidadamojr.android.keepintouch.data.ReminderLab;
 import com.davidadamojr.android.keepintouch.ui.ContactListFragment;
 
 /**
  * Created by ABACUS on 2/1/2015.
  */
 public class ReminderService extends IntentService {
+    private static String TAG = "ReminderService";
 
     public ReminderService(){
         super("ReminderService");
@@ -33,7 +36,7 @@ public class ReminderService extends IntentService {
         long timeAdvance = intent.getLongExtra(ContactListFragment.TIME_EXTRA, 0);
         String phoneNumberUri = "tel:" + phoneNumber;
 
-        PendingIntent pi = PendingIntent.getActivity(this, 0, new Intent(Intent.ACTION_DIAL), 0);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, new Intent(Intent.ACTION_DIAL, Uri.parse(phoneNumberUri)), 0);
         Notification notification = new NotificationCompat.Builder(this)
                 .setTicker(R.string.call_reminder + contactName)
                 .setSmallIcon(android.R.drawable.stat_notify_voicemail)
@@ -49,11 +52,15 @@ public class ReminderService extends IntentService {
 
         // schedule next alarm
         long reminderTime = System.currentTimeMillis() + timeAdvance;
+        ReminderLab.get(getApplicationContext()).getReminder(reminderId).setNextReminder(reminderTime);
+
         Intent alarmIntent = new Intent(getApplicationContext(), ReminderAlarmReceiver.class);
         alarmIntent.putExtra(ContactListFragment.ID_EXTRA, reminderId);
         alarmIntent.putExtra(ContactListFragment.PHONE_NUMBER_EXTRA, phoneNumber);
         alarmIntent.putExtra(ContactListFragment.NAME_EXTRA, contactName);
-        alarmIntent.putExtra(ContactListFragment.TIME_EXTRA, reminderTime);
+        alarmIntent.putExtra(ContactListFragment.TIME_EXTRA, timeAdvance);
+
+        Log.i(TAG, "Recreating PendingIntent with ID: " + Integer.toString(reminderId));
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), reminderId, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC_WAKEUP, reminderTime, pendingIntent); // replace with remainderTime later on
